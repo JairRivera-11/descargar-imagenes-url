@@ -19,41 +19,36 @@ View your app in AI Studio: https://ai.studio/apps/6c5e8ea6-951b-4beb-8ca5-f5302
 3. Run the app:
    `npm run dev`
 
-## Desplegar: frontend en GitHub Pages + backend en Render
+## Desplegar en Vercel
 
-El frontend (React/Vite) puede servirse gratis desde **GitHub Pages**, pero
-Pages solo sirve archivos estáticos: no puede ejecutar el servidor Node ni
-Playwright que usan la extracción de Canva y el proxy de descarga directa.
-Por eso el backend se despliega aparte, en un servicio que sí corre Node
-(aquí, [Render](https://render.com), con plan gratuito).
+Todo el proyecto (frontend + API) se despliega en un solo lugar: Vercel sirve
+el build estático de Vite y detecta automáticamente los archivos en
+[api/](api) (`canva.ts`, `proxy.ts`) como funciones serverless, sin
+necesidad de CORS ni de un backend aparte (todo vive en el mismo dominio).
 
-### 1. Backend en Render
+1. En [vercel.com](https://vercel.com), **Add New > Project** y conecta este
+   repo de GitHub.
+2. Vercel detecta el framework (Vite) y usa la configuración de
+   [vercel.json](vercel.json) (`npm run build:client`, carpeta `dist`) sin
+   que tengas que tocar nada.
+3. Click **Deploy**. Cuando termine, tu app queda en
+   `https://<nombre-del-proyecto>.vercel.app`.
 
-1. Sube este repo a GitHub (público).
-2. En Render: **New > Blueprint**, conecta el repo. Render detecta
-   [render.yaml](render.yaml) automáticamente y crea el servicio
-   `descargar-imagenes-backend` (instala Playwright/Chromium en el build).
-3. Cuando termine el primer deploy, copia la URL pública que te da Render
-   (algo como `https://descargar-imagenes-backend.onrender.com`).
+### Sobre la extracción de Canva en Vercel
 
-> Nota: el plan gratuito de Render "duerme" el servicio tras ~15 min sin
-> tráfico; la primera petición después de eso tarda unos segundos más en
-> responder mientras arranca.
+La extracción usa Playwright con un Chromium headless. En local
+(`npm run dev`) usa el Playwright normal; en Vercel usa
+[`@sparticuz/chromium`](https://github.com/Sparticuz/chromium), una versión
+de Chromium recortada para funciones serverless (el Chromium completo pesa
+demasiado para el límite de tamaño de una función). El cambio de uno a otro
+es automático según el entorno (`services/canva/publicCanvaExtractor.ts`).
 
-### 2. Frontend en GitHub Pages
+Las funciones serverless tienen límite de tiempo: `api/canva.ts` está
+configurado a 60s (el máximo del plan Hobby gratuito), suficiente para
+diseños de Canva de hasta ~15-20 páginas. Diseños mucho más grandes podrían
+agotar ese límite; si eso pasa, el plan Pro de Vercel permite subirlo a 300s.
 
-1. En GitHub: **Settings > Pages**, selecciona *Source: GitHub Actions*.
-2. En **Settings > Secrets and variables > Actions > Variables**, crea la
-   variable `VITE_API_BASE_URL` con la URL de Render del paso anterior (sin
-   `/` al final).
-3. Haz push a `main`. El workflow
-   [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml)
-   construye solo el frontend (`npm run build:client`) y lo publica en
-   `https://tu-usuario.github.io/<nombre-del-repo>/`.
-
-### 3. (Opcional) Restringir CORS
-
-Por defecto el backend acepta peticiones de cualquier origen (`CORS_ORIGIN=*`
-en [render.yaml](render.yaml)), suficiente porque solo hace de proxy de
-imágenes públicas sin cookies ni datos sensibles. Si prefieres restringirlo,
-cambia esa variable en Render a la URL exacta de tu GitHub Pages.
+> No pude probar esta ruta serverless en este entorno (el binario de
+> @sparticuz/chromium es para Linux, no corre en macOS), así que pruébala
+> apenas despliegues y avísame si algo falla — lo más probable, si pasa, es
+> un timeout o un error de memoria, y ambos se ajustan desde `api/canva.ts`.

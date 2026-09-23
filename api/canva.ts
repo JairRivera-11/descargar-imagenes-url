@@ -1,6 +1,13 @@
 import { validateSafeUrl } from '../services/canva/canvaSecurity';
 import { canvaService } from '../services/canva/canvaService';
 
+// Función serverless de Vercel: la extracción con Playwright puede tardar
+// 20-30s+ en diseños con varias páginas, así que se sube el límite de tiempo
+// por encima del default (plan Hobby permite hasta 60s).
+export const config = {
+  maxDuration: 60
+};
+
 export default async function handler(req: any, res: any) {
   const rawUrl = (req.method === 'POST' ? req.body?.url : req.query.url) as string;
 

@@ -1,4 +1,11 @@
 import mime from "mime-types";
+import { validateSafeUrl } from "../services/canva/canvaSecurity";
+
+// Función serverless de Vercel: sube el límite de tiempo por si la URL de
+// origen responde lento (el timeout interno de fetch es de 30s).
+export const config = {
+  maxDuration: 30
+};
 
 // Helper para limpiar nombres de archivos
 function sanitizeFilename(name: string): string {
@@ -12,11 +19,9 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: "URL is required" });
   }
 
-  try {
-    // Validar el formato
-    new URL(targetUrl);
-  } catch {
-    return res.status(400).json({ error: "Invalid URL format" });
+  const safeCheck = validateSafeUrl(targetUrl);
+  if (!safeCheck.valid) {
+    return res.status(400).json({ error: safeCheck.error });
   }
 
   try {

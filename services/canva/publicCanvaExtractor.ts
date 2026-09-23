@@ -1,8 +1,49 @@
-import { chromium, Browser, BrowserContext, Page } from 'playwright';
+import type { Browser, BrowserContext, Page } from 'playwright-core';
 import crypto from 'crypto';
 import mime from 'mime-types';
 import { validateSafeUrl } from './canvaSecurity';
 import { CanvaImage, CanvaExtractOptions, CanvaExtractResult, ICanvaExtractor } from './canvaTypes';
+
+const LOCAL_CHROMIUM_ARGS = [
+  '--no-sandbox',
+  '--disable-setuid-sandbox',
+  '--disable-dev-shm-usage',
+  '--disable-gpu',
+  '--no-first-run',
+  '--no-zygote'
+];
+
+/**
+ * Lanza Chromium según el entorno de ejecución:
+ * - En una función serverless de Vercel (VERCEL_ENV = "production"/"preview")
+ *   usa @sparticuz/chromium, un binario recortado para ese entorno Linux,
+ *   junto con playwright-core (sin el Chromium completo de Playwright, que
+ *   pesa demasiado para el límite de tamaño de una función serverless).
+ * - En local ("npm run dev", o "vercel dev" con VERCEL_ENV=development) usa
+ *   el Playwright normal, con el Chromium ya instalado en la máquina.
+ */
+async function launchChromium(): Promise<Browser> {
+  const isVercelCloud = !!process.env.VERCEL && process.env.VERCEL_ENV !== 'development';
+
+  if (isVercelCloud) {
+    const [{ default: sparticuzChromium }, { chromium: coreChromium }] = await Promise.all([
+      import('@sparticuz/chromium'),
+      import('playwright-core')
+    ]);
+
+    return coreChromium.launch({
+      args: sparticuzChromium.args,
+      executablePath: await sparticuzChromium.executablePath(),
+      headless: true
+    });
+  }
+
+  const { chromium: localChromium } = await import('playwright');
+  return localChromium.launch({
+    headless: true,
+    args: LOCAL_CHROMIUM_ARGS
+  });
+}
 
 // Constantes configurables según Paso 7 y 14
 const DEFAULT_TIMEOUT_MS = 30000;
@@ -121,18 +162,8 @@ export class PublicCanvaExtractor implements ICanvaExtractor {
     const seenHashes = new Set<string>();
 
     try {
-      // Lanzar Playwright Chromium
-      browser = await chromium.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu',
-          '--no-first-run',
-          '--no-zygote'
-        ]
-      });
+      // Lanzar Chromium (Playwright normal en local, @sparticuz/chromium en Vercel)
+      browser = await launchChromium();
 
       context = await browser.newContext({
         viewport: { width: 1920, height: 1080 },
