@@ -26,10 +26,23 @@ async function launchChromium(): Promise<Browser> {
   const isVercelCloud = !!process.env.VERCEL && process.env.VERCEL_ENV !== 'development';
 
   if (isVercelCloud) {
+    // @sparticuz/chromium solo extrae sus librerías del sistema (libnss3.so y
+    // compañía, necesarias para que el binario arranque) y configura
+    // LD_LIBRARY_PATH cuando "reconoce" que corre dentro de un contenedor
+    // Lambda real, chequeando variables de entorno de AWS que Vercel no
+    // expone igual. Ese chequeo ocurre al importar el módulo, así que hay que
+    // forzarlo ANTES del import (si el usuario ya definió esta variable en
+    // Vercel, se respeta con "??=").
+    process.env.AWS_LAMBDA_JS_RUNTIME ??= 'nodejs20.x';
+
     const [{ default: sparticuzChromium }, { chromium: coreChromium }] = await Promise.all([
       import('@sparticuz/chromium'),
       import('playwright-core')
     ]);
+
+    // No necesitamos WebGL para leer imágenes de una página: desactivarlo
+    // evita extraer el stack gráfico (swiftshader), ahorrando tiempo de arranque.
+    sparticuzChromium.setGraphicsMode = false;
 
     return coreChromium.launch({
       args: sparticuzChromium.args,
