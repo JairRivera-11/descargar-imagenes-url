@@ -169,7 +169,7 @@ export default function App() {
         // FLUJO CANVA
         if (currentItem.sourceType === 'canva' || isCanvaUrl(currentItem.url)) {
           try {
-            const res = await fetch(apiUrl('/api/canva/extract'), {
+            const res = await fetch(apiUrl('/api/canva'), {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ url: currentItem.url }),

@@ -23,7 +23,7 @@ export class CanvaService {
     if (!this.isCanvaUrl(url)) {
       return {
         success: false,
-        canvaUrl: url,
+        finalUrl: url,
         images: [],
         error: "La URL proporcionada no es una URL reconocida de Canva (ej: canva.link/* o canva.com/*)"
       };
