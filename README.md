@@ -1,23 +1,39 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Mass URL Downloader
 
-# Run and deploy your AI Studio app
+Aplicación web propia para descargar imágenes en lote desde una lista de
+URLs, con soporte especial para extraer automáticamente todas las imágenes
+de un diseño de Canva a partir de su enlace público (`canva.link/...` o
+`canva.com/design/...`).
 
-This contains everything you need to run your app locally.
+## Funcionalidad
 
-View your app in AI Studio: https://ai.studio/apps/6c5e8ea6-951b-4beb-8ca5-f5302e003d3b
+- Pega una lista de URLs (una por línea) y descárgalas todas organizadas en
+  carpetas dentro de un único ZIP.
+- Detecta automáticamente enlaces de Canva, navega el diseño con un
+  Chromium headless (Playwright) y extrae cada imagen de sus páginas,
+  nombrando la carpeta igual que el título del diseño.
+- Permite personalizar la carpeta de destino por línea (`Carpeta | https://...`)
+  o por distintos modos de organización automática (dominio, ruta, etc.).
+- Descargas concurrentes configurables para procesar lotes grandes de URLs.
+
+## Stack
+
+- Frontend: React + Vite + Tailwind.
+- Backend: Express (desarrollo local) / funciones serverless de Vercel
+  (`api/canva.ts`, `api/proxy.ts`) en producción.
+- Extracción de Canva: Playwright, con `@sparticuz/chromium` para correr en
+  el entorno serverless de Vercel.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Run the app:
    `npm run dev`
+
+La app queda disponible en `http://localhost:3000`.
 
 ## Desplegar en Vercel
 
@@ -47,8 +63,3 @@ Las funciones serverless tienen límite de tiempo: `api/canva.ts` está
 configurado a 60s (el máximo del plan Hobby gratuito), suficiente para
 diseños de Canva de hasta ~15-20 páginas. Diseños mucho más grandes podrían
 agotar ese límite; si eso pasa, el plan Pro de Vercel permite subirlo a 300s.
-
-> No pude probar esta ruta serverless en este entorno (el binario de
-> @sparticuz/chromium es para Linux, no corre en macOS), así que pruébala
-> apenas despliegues y avísame si algo falla — lo más probable, si pasa, es
-> un timeout o un error de memoria, y ambos se ajustan desde `api/canva.ts`.

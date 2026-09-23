@@ -1,6 +1,0 @@
-{
-  "name": "Mass URL Downloader",
-  "description": "Una aplicación web para descargar contenido desde múltiples URLs de forma automática.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
