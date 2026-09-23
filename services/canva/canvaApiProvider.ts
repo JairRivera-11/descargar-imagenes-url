@@ -1,4 +1,4 @@
-import { CanvaExtractOptions, CanvaExtractResult, ICanvaExtractor } from './canvaTypes';
+import { CanvaExtractOptions, CanvaExtractResult, ICanvaExtractor } from './canvaTypes.js';
 
 /**
  * Proveedor preparado para integración futura con Canva Connect API (OAuth 2.0).

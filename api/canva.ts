@@ -1,5 +1,5 @@
-import { validateSafeUrl } from '../services/canva/canvaSecurity';
-import { canvaService } from '../services/canva/canvaService';
+import { validateSafeUrl } from '../services/canva/canvaSecurity.js';
+import { canvaService } from '../services/canva/canvaService.js';
 
 // Función serverless de Vercel: la extracción con Playwright puede tardar
 // 20-30s+ en diseños con varias páginas, así que se sube el límite de tiempo

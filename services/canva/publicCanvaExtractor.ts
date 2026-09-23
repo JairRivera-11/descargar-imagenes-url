@@ -1,8 +1,8 @@
 import type { Browser, BrowserContext, Page } from 'playwright-core';
 import crypto from 'crypto';
 import mime from 'mime-types';
-import { validateSafeUrl } from './canvaSecurity';
-import { CanvaImage, CanvaExtractOptions, CanvaExtractResult, ICanvaExtractor } from './canvaTypes';
+import { validateSafeUrl } from './canvaSecurity.js';
+import { CanvaImage, CanvaExtractOptions, CanvaExtractResult, ICanvaExtractor } from './canvaTypes.js';
 
 const LOCAL_CHROMIUM_ARGS = [
   '--no-sandbox',

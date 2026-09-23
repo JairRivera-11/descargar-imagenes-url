@@ -1,5 +1,5 @@
 import mime from "mime-types";
-import { validateSafeUrl } from "../services/canva/canvaSecurity";
+import { validateSafeUrl } from "../services/canva/canvaSecurity.js";
 
 // Función serverless de Vercel: sube el límite de tiempo por si la URL de
 // origen responde lento (el timeout interno de fetch es de 30s).

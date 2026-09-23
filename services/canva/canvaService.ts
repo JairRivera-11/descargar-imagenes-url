@@ -1,7 +1,7 @@
-import { isCanvaUrl } from '../../src/utils/canvaDetector';
-import { PublicCanvaExtractor, resolveCanvaUrl } from './publicCanvaExtractor';
-import { CanvaApiProvider } from './canvaApiProvider';
-import { CanvaExtractOptions, CanvaExtractResult, CanvaImage, ICanvaExtractor } from './canvaTypes';
+import { isCanvaUrl } from '../../src/utils/canvaDetector.js';
+import { PublicCanvaExtractor, resolveCanvaUrl } from './publicCanvaExtractor.js';
+import { CanvaApiProvider } from './canvaApiProvider.js';
+import { CanvaExtractOptions, CanvaExtractResult, CanvaImage, ICanvaExtractor } from './canvaTypes.js';
 
 export class CanvaService {
   private extractor: ICanvaExtractor;
@@ -39,4 +39,4 @@ export class CanvaService {
 // Instancia singleton para el servidor
 export const canvaService = new CanvaService();
 export { isCanvaUrl, resolveCanvaUrl, PublicCanvaExtractor, CanvaApiProvider };
-export * from './canvaTypes';
+export * from './canvaTypes.js';
