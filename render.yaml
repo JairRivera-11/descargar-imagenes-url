@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: descargar-imagenes-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx playwright install --with-deps chromium && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Restringe qué orígenes pueden llamar a la API una vez que conozcas la
+      # URL final de GitHub Pages, por ejemplo:
+      # https://tu-usuario.github.io
+      - key: CORS_ORIGIN
+        value: "*"
